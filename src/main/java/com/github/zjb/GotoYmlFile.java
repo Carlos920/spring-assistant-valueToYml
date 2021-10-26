@@ -110,13 +110,9 @@ public class GotoYmlFile implements GotoDeclarationHandler {
     }
 
     private String getValueKey(String literalValue) {
-        int index = literalValue.indexOf("${");
-        if (index == -1) {
-            return "";
-        }
-        String valueKey = literalValue.substring(index + 2, literalValue.indexOf("}"));
+        String valueKey = literalValue.substring(literalValue.indexOf("${") + 2, literalValue.indexOf("}"));
         //带有默认值的注解的解析，比如@Value("${a.b.c:123}")
-        if (valueKey.contains(DEFAULT_SPLIT)) {
+        if(valueKey.contains(DEFAULT_SPLIT)){
             valueKey = valueKey.split(DEFAULT_SPLIT)[0];
         }
         return valueKey;
@@ -137,6 +133,9 @@ public class GotoYmlFile implements GotoDeclarationHandler {
             return new PsiElement[0];
         }
         String key = sourceElement.getText();
+        if (!key.contains("$")){
+            return new PsiElement[0];
+        }
         key = getValueKey(key);
         Project project = sourceElement.getProject();
         Collection<VirtualFile> files = FileTypeIndex.getFiles(YAMLFileType.YML, GlobalSearchScope.projectScope(project));
