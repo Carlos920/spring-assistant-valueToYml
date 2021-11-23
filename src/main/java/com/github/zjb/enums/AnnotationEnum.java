@@ -10,7 +10,7 @@ public enum AnnotationEnum {
     VALUE("Value", "org.springframework.beans.factory.annotation.Value"),
     SCHEDULED("Scheduled", "org.springframework.scheduling.annotation.Scheduled"),
     /**
-     * 注解<code>ConfigurationProperties</code>比较特殊，未包裹在<code>${}</code>中
+     * 注解<code>@ConfigurationProperties</code>，未包裹在<code>${}</code>中
      */
     CONFIGURATIONPROPERTIES("ConfigurationProperties", "org.springframework.boot.context.properties.ConfigurationProperties");
 
