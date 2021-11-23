@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'com.github.zjb-it'
-version '13.1'
+version '13.2'
 
 repositories {
     repositories {
@@ -30,4 +30,7 @@ patchPluginXml {
 
     sinceBuild = "145.258"
     untilBuild = null
+}
+runIde{
+    autoReloadPlugins = true
 }

@@ -54,9 +54,10 @@ public class GotoYmlFile implements GotoDeclarationHandler {
     private PsiElement[] ymlToJava(@NotNull PsiElement sourceElement) {
         String configFullName = YAMLUtil.getConfigFullName(PsiTreeUtil.getParentOfType(sourceElement, YAMLPsiElement.class));
         Pair<PsiElement, String> value = YAMLUtil.getValue((YAMLFile) sourceElement.getContainingFile(), configFullName.split("\\."));
+        /*//判断yaml对象的值是否是空值
         if (Objects.isNull(value) || !(value.getFirst() instanceof YAMLPlainTextImpl)) {
             return DEFAULT_RESULT;
-        }
+        }*/
         Project project = sourceElement.getProject();
         Collection<VirtualFile> files = FileTypeIndex.getFiles(JavaFileType.INSTANCE, GlobalSearchScope.projectScope(project));
         if (CollectionUtils.isEmpty(files)) {
@@ -79,7 +80,7 @@ public class GotoYmlFile implements GotoDeclarationHandler {
                     JvmAnnotationAttributeValue attributeValue = psiNameValuePair.getAttributeValue();
                     if (checkEquals(configFullName, attributeValue)) {
                         result.add(psiAnnotation);
-                      //有一个相等就不匹配其它的了
+                        //有一个相等就不匹配其它的了
                         break;
                     }
                 }
@@ -91,9 +92,9 @@ public class GotoYmlFile implements GotoDeclarationHandler {
     private Boolean checkEquals(String configFullName, JvmAnnotationAttributeValue constantValue) {
         if (constantValue instanceof JvmAnnotationConstantValue) {
             String literalValue = ((JvmAnnotationConstantValue) constantValue).getConstantValue().toString();
-            if (!literalValue.startsWith("$")){
+            /*if (!literalValue.startsWith("$")){
                 return false;
-            }
+            }*/
             String valueKey = getValueKey(literalValue);
             return Objects.equals(valueKey, configFullName);
         }
@@ -109,10 +110,22 @@ public class GotoYmlFile implements GotoDeclarationHandler {
         return false;
     }
 
+    private String getValueKey(String literalValue, Boolean isSpecial) {
+        String valueKey = literalValue;
+        // 去除多余的引号 默认格式:""a.b.c""
+        if (literalValue.contains("\"") && isSpecial) {
+            valueKey = literalValue.substring(1, literalValue.length() - 1);
+        }
+        return getValueKey(valueKey);
+    }
+
     private String getValueKey(String literalValue) {
-        String valueKey = literalValue.substring(literalValue.indexOf("${") + 2, literalValue.indexOf("}"));
+        String valueKey = literalValue;
+        if (literalValue.contains("${")) {
+            valueKey = literalValue.substring(literalValue.indexOf("${") + 2, literalValue.indexOf("}"));
+        }
         //带有默认值的注解的解析，比如@Value("${a.b.c:123}")
-        if(valueKey.contains(DEFAULT_SPLIT)){
+        if (valueKey.contains(DEFAULT_SPLIT)) {
             valueKey = valueKey.split(DEFAULT_SPLIT)[0];
         }
         return valueKey;
@@ -122,25 +135,25 @@ public class GotoYmlFile implements GotoDeclarationHandler {
     private PsiElement[] javaGoToYml(@NotNull PsiElement sourceElement) {
         IElementType tokenType = ((PsiJavaToken) sourceElement).getTokenType();
         if (tokenType != JavaTokenType.STRING_LITERAL) {
-            return new PsiElement[0];
+            return DEFAULT_RESULT;
         }
 
         PsiAnnotation psiAnnotation = PsiTreeUtil.getParentOfType(sourceElement, PsiAnnotation.class);
         if (Objects.isNull(psiAnnotation)) {
-            return new PsiElement[0];
+            return DEFAULT_RESULT;
         }
         if (!EnumUtil.containAnnotation(psiAnnotation)) {
-            return new PsiElement[0];
+            return DEFAULT_RESULT;
         }
         String key = sourceElement.getText();
-        if (!key.contains("$")){
-            return new PsiElement[0];
-        }
-        key = getValueKey(key);
+        /*if (!key.contains("$")){
+            return DEFAULT_RESULT;
+        }*/
+        key = getValueKey(key, EnumUtil.isSpecial(psiAnnotation));
         Project project = sourceElement.getProject();
         Collection<VirtualFile> files = FileTypeIndex.getFiles(YAMLFileType.YML, GlobalSearchScope.projectScope(project));
         if (CollectionUtils.isEmpty(files)) {
-            return new PsiElement[0];
+            return DEFAULT_RESULT;
         }
 
         List<PsiElement> result = new ArrayList<>(files.size());

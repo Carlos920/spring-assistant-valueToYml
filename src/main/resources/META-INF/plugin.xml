@@ -51,6 +51,8 @@
 </body>
     ]]></description>
     <change-notes><![CDATA[
+        <h2>13.2</h2>
+            <p>增加ConfigurationProperties</p>
         <h2>13.1</h2>
             <p>增加Scheduled</p>
             <p>修复bug</p>

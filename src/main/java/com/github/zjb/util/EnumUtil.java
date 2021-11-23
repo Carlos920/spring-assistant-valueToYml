@@ -24,5 +24,8 @@ public class EnumUtil {
         return ANNOTATION_ENUM_MAP.containsKey(psiAnnotation.getQualifiedName());
     }
 
+    public static Boolean isSpecial(PsiAnnotation psiAnnotation) {
+        return AnnotationEnum.special().contains(psiAnnotation.getQualifiedName());
+    }
 
 }
